@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+yfinance
+passlib[bcrypt]
+python-jose[cryptography]
+fastapi[standard]
+pyjwt
+pwdlib[argon2]
+sqlmodel
