@@ -20,7 +20,9 @@ function Profile(props: ProfileProps) {
 
                     <div style={infoRowStyle}>
                         <UserIcon size={16} color="#666" /> 
-                        <span><strong>Name:</strong> {user.full_name}</span>
+                        <span>
+                            <strong>Name:</strong> {user.full_name}
+                        </span>
                     </div>
                     
                     <div style={infoRowStyle}>

@@ -92,7 +92,7 @@ function AppContent() {
 
       <div style={{ padding: '20px' }}>
         <Routes>
-          <Route path="/login" element={<LoginForm onLoginSuccess={(userData) => setUser(userData)} />} />
+          <Route path="/login" element={<LoginForm />} />
           <Route path="/register" element={<RegisterForm />} />
           <Route path="/profile" element={<Profile user={user} />} />
           <Route path="/" element={<h2>Follow and exchange about the best trading strategies</h2>} />
