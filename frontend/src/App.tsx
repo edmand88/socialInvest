@@ -33,11 +33,16 @@ function AppContent() {
     navigate("/");
   };
 
-  return (
-    <>
+    return (
+      <div style={{ 
+        backgroundColor: '#f4f7f6', 
+        minHeight: '100vh', 
+        width: '100%',
+        margin: 0,
+        padding: 0
+      }}>
       <nav style={{ 
         padding: '10px 20px', 
-        borderBottom: '1px solid #ccc',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center'
@@ -78,19 +83,8 @@ function AppContent() {
             </>
           ) : (
             <>
-              <NavLink 
-                to="/login" 
-                className="nav-link nav-login"
-              >
-                Login
-              </NavLink>
-
-              <NavLink 
-                to="/register" 
-                className="nav-link nav-register"
-              >
-                Register
-              </NavLink>
+              <NavLink to="/login" className="nav-link nav-login">Login</NavLink>
+              <NavLink to="/register" className="nav-link nav-register">Register</NavLink>
             </>
           )}
         </div>
@@ -98,16 +92,13 @@ function AppContent() {
 
       <div style={{ padding: '20px' }}>
         <Routes>
-          <Route 
-            path="/login" 
-            element={<LoginForm onLoginSuccess={(userData) => setUser(userData)} />} 
-          />
+          <Route path="/login" element={<LoginForm onLoginSuccess={(userData) => setUser(userData)} />} />
           <Route path="/register" element={<RegisterForm />} />
           <Route path="/profile" element={<Profile user={user} />} />
           <Route path="/" element={<h2>Follow and exchange about the best trading strategies</h2>} />
         </Routes>
       </div>
-    </>
+    </div>
   );
 }
 

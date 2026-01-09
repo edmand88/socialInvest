@@ -5,12 +5,14 @@ function RegisterForm() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await register(username, email, password);
+      await register(username, email, password, fullName);
       alert("Registration Successful! Now please log in.");
+      setFullName('');
       setUsername('');
       setEmail('');
       setPassword('');
@@ -45,6 +47,16 @@ function RegisterForm() {
         <h2 style={{ textAlign: 'center', margin: '0 0 10px 0', color: '#333' }}>
           Join socialInvest
         </h2>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+          <label style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>Full Name</label>
+          <input 
+            placeholder="Enter your full name" 
+            value={fullName} 
+            onChange={(e) => setFullName(e.target.value)} 
+            style={inputStyle}
+          />
+        </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
           <label style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>Username</label>

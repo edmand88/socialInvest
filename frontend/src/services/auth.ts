@@ -42,7 +42,7 @@ export const getMe = async (token: string): Promise<UserPublic> => {
     return response.json();
 };
 
-export const register = async (username: string, email: string, password: string): Promise<UserPublic> => {
+export const register = async (username: string, email: string, password: string, full_name: string): Promise<UserPublic> => {
     const response = await fetch(`${API_URL}/register`, {
         method: 'POST',
         headers: {
@@ -52,7 +52,7 @@ export const register = async (username: string, email: string, password: string
             username: username,
             email: email,
             password: password,
-            full_name: null
+            full_name
         }),
     });
 
