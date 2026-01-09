@@ -63,3 +63,36 @@ export const register = async (username: string, email: string, password: string
 
     return response.json();
 };
+
+export const editName = async (token: string, new_name: string): Promise<UserPublic> => {
+    const response = await fetch(`${API_URL}/users/me/name?new_name=${encodeURIComponent(new_name)}`, {
+        method: 'PATCH',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error('Unable to edit name.');
+    }
+
+    return response.json();
+};
+
+export const editEmail = async (token: string, new_email: string): Promise<UserPublic> => {
+    const response = await fetch(`${API_URL}/users/me/email?new_email=${encodeURIComponent(new_email)}`, {
+        method: 'PATCH',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        }
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Unable to edit email.');
+    }
+
+    return response.json();
+};

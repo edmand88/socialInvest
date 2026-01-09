@@ -159,3 +159,27 @@ async def read_users_me(
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+@app.patch("/users/me/name", response_model=UserPublic)
+async def update_user_name(
+    new_name: str, 
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    session: SessionDep
+):
+    current_user.full_name = new_name
+    session.add(current_user)
+    session.commit()
+    session.refresh(current_user)
+    return current_user
+
+@app.patch("/users/me/email", response_model=UserPublic)
+async def update_user_email(
+    new_email: EmailStr,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    session: SessionDep
+):
+    current_user.email = new_email
+    session.add(current_user)
+    session.commit()
+    session.refresh(current_user)
+    return current_user
