@@ -363,7 +363,7 @@ const stockItemStyle = {
 };
 
 const tickerStyle = { fontWeight: '800' as const, color: '#2d3436' };
-const pricePlaceholderStyle = { color: '#28a745', fontSize: '0.85rem', fontWeight: 'bold' as const };
+const pricePlaceholderStyle = { color: '#2d2d2d', fontSize: '0.85rem', fontWeight: 'bold' as const };
 
 const searchBoxStyle = { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', backgroundColor: '#f5f7f9', borderRadius: '10px', border: '1px solid #eee' };
 const searchFieldStyle = { border: 'none', background: 'none', outline: 'none', width: '100%', fontSize: '0.9rem' };
