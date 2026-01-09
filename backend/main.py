@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
+from sqlmodel import or_
+import yfinance as yf
 
 import jwt
 from fastapi import Depends, FastAPI, HTTPException, status
@@ -132,23 +134,24 @@ def register_user(user_in: UserCreate, session: SessionDep):
     session.refresh(db_user)
     return db_user
 
-@app.post("/token")
+@app.post("/token", response_model=Token)
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: SessionDep
-) -> Token:
+):
     user = authenticate_user(session, form_data.username, form_data.password)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        raise HTTPException(status_code=401, detail="Incorrect username or password")
+
     access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+        data={"sub": user.username},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     )
-    return Token(access_token=access_token, token_type="bearer", user=user)
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
+    }
 
 @app.get("/users/me/", response_model=UserPublic)
 async def read_users_me(
@@ -183,3 +186,92 @@ async def update_user_email(
     session.commit()
     session.refresh(current_user)
     return current_user
+
+class Watchlist(SQLModel, table=True):
+    user_id: int = Field(foreign_key="user.id", primary_key=True)
+    ticker: str = Field(primary_key=True)
+
+@app.post("/watchlist/{ticker}")
+async def add_to_watchlist(
+    ticker: str, 
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    session: SessionDep
+):
+    item = Watchlist(user_id=current_user.id, ticker=ticker.upper())
+    session.add(item)
+    session.commit()
+    return {"status": "success"}
+
+@app.get("/watchlist", response_model=list[str])
+async def get_watchlist(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    session: SessionDep
+):
+    statement = select(Watchlist.ticker).where(Watchlist.user_id == current_user.id)
+    results = session.exec(statement).all()
+    return results
+
+@app.delete("/watchlist/{ticker}")
+async def remove_from_watchlist(
+    ticker: str, 
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    session: SessionDep
+):
+    statement = select(Watchlist).where(
+        Watchlist.user_id == current_user.id, 
+        Watchlist.ticker == ticker.upper()
+    )
+    results = session.exec(statement)
+    item = results.one()
+    session.delete(item)
+    session.commit()
+    return {"status": "deleted"}
+
+@app.get("/watchlist/prices")
+async def get_watchlist_prices(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    session: SessionDep
+):
+    statement = select(Watchlist.ticker).where(Watchlist.user_id == current_user.id)
+    tickers = session.exec(statement).all()
+
+    if not tickers:
+        return {}
+
+    prices = {}
+
+    for ticker in tickers:
+        try:
+            data = yf.download(ticker, period="1d", interval="1m", progress=False)
+            if not data.empty:
+                prices[ticker] = round(float(data["Close"].iloc[-1]), 2)
+            else:
+                prices[ticker] = None
+        except Exception as e:
+            print(f"Error fetching {ticker}: {e}")
+            prices[ticker] = None
+
+    return prices
+    
+class StockMetadata(SQLModel, table=True):
+    __tablename__ = "stock_metadata"
+    symbol: str = Field(primary_key=True)
+    name: str
+
+@app.get("/stocks/search")
+async def search_stocks(q: str, session: SessionDep):
+    if len(q) < 2:
+        return []
+    
+    statement = (
+        select(StockMetadata)
+        .where(
+            or_(
+                StockMetadata.symbol.startswith(q.upper()),
+                StockMetadata.name.contains(q)
+            )
+        )
+        .limit(10)
+    )
+    results = session.exec(statement).all()
+    return results
