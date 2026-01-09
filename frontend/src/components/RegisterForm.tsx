@@ -17,18 +17,25 @@ function RegisterForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+  
     const newErrors = { username: '', email: '', password: '', fullName: '' };
     setErrors(newErrors);
     setIsSuccessful(false);
 
-    let hasEmpty = false;
-    if (!fullName) { newErrors.fullName = 'Full Name is required'; hasEmpty = true; }
-    if (!username) { newErrors.username = 'Username is required'; hasEmpty = true; }
-    if (!email) { newErrors.email = 'Email is required'; hasEmpty = true; }
-    if (!password) { newErrors.password = 'Password is required'; hasEmpty = true; }
+    let hasError = false;
+    
+    if (!fullName) { newErrors.fullName = 'Full Name is required'; hasError = true; }
+    if (!username) { newErrors.username = 'Username is required'; hasError = true; }
+    if (!email) { newErrors.email = 'Email is required'; hasError = true; }
+    if (!password) { newErrors.password = 'Password is required'; hasError = true; }
 
-    if (hasEmpty) {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (email && !emailPattern.test(email)) {
+      newErrors.email = 'Please enter a valid email address';
+      hasError = true;
+    }
+
+    if (hasError) {
       setErrors(newErrors);
       return;
     }
