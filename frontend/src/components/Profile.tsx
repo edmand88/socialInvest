@@ -19,6 +19,7 @@ function Profile(props: ProfileProps) {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [editWatchlist, setEditWatchlist] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [emailError, setEmailError] = useState('');
     const [searchResults, setSearchResults] = useState<{symbol: string, name: string}[]>([]);
 
     const syncMarketData = async () => {
@@ -65,10 +66,22 @@ function Profile(props: ProfileProps) {
 
     const handleSaveEmail = async () => {
         const token = localStorage.getItem('token');
-        if (token && newEmail) {
-            await editEmail(token, newEmail);
-            setIsEditingEmail(false);
-            window.location.reload(); 
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!newEmail || !emailPattern.test(newEmail)) {
+            setEmailError('Please enter a valid email address.');
+            return;
+        }
+
+        if (token) {
+            try {
+                await editEmail(token, newEmail);
+                setEmailError('');
+                setIsEditingEmail(false);
+                window.location.reload(); 
+            } catch (err) {
+                setEmailError("Email already in use or update failed.");
+            }
         }
     };
 
@@ -128,10 +141,31 @@ function Profile(props: ProfileProps) {
                 <div style={infoRowStyle}>
                     <Mail size={16} color="#666" />
                     {isEditingEmail ? (
-                        <div style={editContainerStyle}>
-                            <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} style={editInputStyle}/>
-                            <button onClick={handleSaveEmail} style={iconSuccessButtonStyle}><Check size={14}/></button>
-                            <button onClick={() => setIsEditingEmail(false)} style={iconCancelButtonStyle}><X size={14}/></button>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <div style={editContainerStyle}>
+                                <input 
+                                    type="email" 
+                                    value={newEmail} 
+                                    onChange={(e) => {
+                                        setNewEmail(e.target.value);
+                                        if (emailError) setEmailError('');
+                                    }} 
+                                    style={{
+                                        ...editInputStyle,
+                                        borderColor: emailError ? '#dc3545' : '#ddd'
+                                    }}
+                                />
+                                <button onClick={handleSaveEmail} style={iconSuccessButtonStyle}><Check size={14}/></button>
+                                <button onClick={() => {
+                                    setIsEditingEmail(false);
+                                    setEmailError('');
+                                }} style={iconCancelButtonStyle}><X size={14}/></button>
+                            </div>
+                            {emailError && (
+                                <span style={{ color: '#dc3545', fontSize: '0.7rem', fontWeight: 'bold' }}>
+                                    {emailError}
+                                </span>
+                            )}
                         </div>
                     ) : (
                         <span style={rowContentStyle}>
