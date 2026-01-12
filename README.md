@@ -17,3 +17,4 @@
 ### Profile Page
 
 ![Profile Page](images/profile_page.png)
+⚠️ *Note: The friend feature is still under development.*
