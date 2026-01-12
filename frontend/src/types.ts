@@ -3,7 +3,6 @@ export interface UserPublic {
     username: string;
     email: string;
     full_name: string | null;
-    points: number;
 }
 
 export interface Token {
@@ -17,5 +16,4 @@ export interface User {
     email: string;
     full_name: string | null;
     disabled: boolean;
-    points: number;
 }
