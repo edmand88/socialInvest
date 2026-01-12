@@ -1,10 +1,10 @@
 const API_URL = "http://localhost:8000";
 
 export const getWatchlist = async (token: string): Promise<string[]> => {
-    const res = await fetch(`${API_URL}/watchlist`, {
+    const response = await fetch(`${API_URL}/watchlist`, {
         headers: { Authorization: `Bearer ${token}` }
     });
-    return res.json();
+    return response.json();
 };
 
 export const addToWatchlist = async (token: string, ticker: string) => {
@@ -22,8 +22,8 @@ export const removeFromWatchlist = async (token: string, ticker: string) => {
 };
 
 export const getWatchlistPrices = async (token: string) => {
-    const res = await fetch(`${API_URL}/watchlist/prices`, {
+    const response = await fetch(`${API_URL}/watchlist/prices`, {
         headers: { Authorization: `Bearer ${token}` }
     });
-    return res.json();
+    return response.json();
 };
