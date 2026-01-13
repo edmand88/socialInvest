@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { User } from '../types'; 
 import { User as UserIcon, TrendingUp, Mail, Users, Edit2, X, Check, Search, Plus, Trash2, RefreshCw } from 'lucide-react';
 import { editName, editEmail } from '../services/auth';
-import { getWatchlist, removeFromWatchlist, getWatchlistPrices } from '../services/watchlist';
+import { addToWatchlist, getWatchlist, removeFromWatchlist, getWatchlistPrices } from '../services/watchlist';
 
 interface ProfileProps {
     user: User | null;
+    setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
 function Profile(props: ProfileProps) {
@@ -47,20 +48,24 @@ function Profile(props: ProfileProps) {
         }
         const timeout = setTimeout(async () => {
             try {
-                const res = await fetch(`http://localhost:8000/stocks/search?q=${encodeURIComponent(searchQuery)}`);
-                const data = await res.json();
+                const response = await fetch(`http://localhost:8000/stocks/search?q=${encodeURIComponent(searchQuery)}`);
+                const data = await response.json();
                 setSearchResults(data);
             } catch (err) { console.error('Search failed', err); }
-        }, 300);
+        }, 100);
         return () => clearTimeout(timeout);
     }, [searchQuery]);
 
     const handleSaveName = async () => {
         const token = localStorage.getItem('token');
         if (token && newName) {
-            await editName(token, newName);
-            setIsEditingName(false);
-            window.location.reload(); 
+            try {
+                await editName(token, newName);
+                props.setUser(prev => prev ? { ...prev, full_name: newName } : prev);
+                setIsEditingName(false);
+            } catch (err) {
+                console.error("Failed to update name", err);
+            }
         }
     };
 
@@ -77,8 +82,8 @@ function Profile(props: ProfileProps) {
             try {
                 await editEmail(token, newEmail);
                 setEmailError('');
+                props.setUser(prev => prev ? { ...prev, email: newEmail } : prev);
                 setIsEditingEmail(false);
-                window.location.reload(); 
             } catch (err) {
                 setEmailError("Email already in use or update failed.");
             }
@@ -88,10 +93,7 @@ function Profile(props: ProfileProps) {
     const handleAddTicker = async (ticker: string) => {
         const token = localStorage.getItem('token');
         if (!token || watchlist.includes(ticker)) return;
-        await fetch(`http://localhost:8000/watchlist/${ticker}`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        await addToWatchlist(token, ticker);
         setSearchQuery('');
         setSearchResults([]);
         syncMarketData();

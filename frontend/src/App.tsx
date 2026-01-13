@@ -94,7 +94,7 @@ function AppContent() {
         <Routes>
           <Route path="/login" element={<LoginForm />} />
           <Route path="/register" element={<RegisterForm />} />
-          <Route path="/profile" element={<Profile user={user} />} />
+          <Route path="/profile" element={<Profile user={user} setUser={setUser}/>} />
           <Route path="/" element={<h2>Follow and exchange about the best trading strategies</h2>} />
         </Routes>
       </div>
